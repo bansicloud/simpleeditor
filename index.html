@@ -1,0 +1,129 @@
+<html>
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>Simple editor</title>		
+		<link rel="stylesheet" href="css/se.css">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+	  	<meta name="mobile-web-app-capable" content="yes" />
+	  	<meta name="apple-mobile-web-app-capable" content="yes" />    
+	  	<meta name="format-detection" content="telephone=no" />
+	</head>
+	<body>		
+		<div id="editor"></div>
+		<div style="display: none" id="content">
+		</div>
+		<script src="js/se.js"></script>
+		<script>
+				// HTML Callback
+					var exportHTML = function(new_html_)  {
+						//console.log("storree new html: ", new_html_)
+					}
+
+
+				// Dummy Uploader
+					var uploadFiles = function(dom_, callback_, opt_remove_) {
+						
+						// Remove 
+							if (opt_remove_) {
+								//console.warn("cancel upload for: ", opt_remove_);
+								return;	
+							}
+
+						// Uploader vars
+							
+							var view_id = null;
+							var view_ids = [];							
+						    var uploaderUUID = 1;
+						    var fileUUID = 0;
+						
+						// File Input
+							let inputFile = document.createElement("input")
+						    inputFile.type = "file"
+						    inputFile.multiple = true;
+						    inputFile.style.display = "none";
+						    dom_.parentNode.appendChild(inputFile);						    
+
+						    // Input Change listener
+						    inputFile.addEventListener("change", e => {						    	
+						    	var files = e.currentTarget.files;
+						    	
+						    	// Loop files						    
+						    	if (files.length!=0) {
+	 						    	// Open view changes
+								    	callback_("open");								    
+								    // add files								    	
+								    	for (var i = 0; i < files.length; i++) {
+								    		fileUUID = i;
+								    		view_id = callback_("add", {file:files[i], uploader: uploaderUUID, fileid: fileUUID } );
+								    		view_ids.push([view_id,files[i]]);
+								    	};								  								   
+								    // Close view changes
+								    	callback_("close");
+								}
+
+								// Tests 
+							    	setTimeout(function () { 
+							    		for (var i = 0; i < view_ids.length; i++) {
+							    			// test progress
+							    				callback_("progress", {id:view_ids[i][0],value:1});								    			
+							    		}
+							    	}, 100);
+							    	setTimeout(function () { 
+							    		for (var i = 0; i < view_ids.length; i++) {
+							    			// test success
+								    			callback_("update", {id:view_ids[i][0], url: URL.createObjectURL(view_ids[i][1]) });
+								    		// test fail
+								    			// callback_("remove", {id:view_ids[i]});
+								    	}
+								    }, 2100);
+
+						    });	
+
+						// Pass event
+							dom_.addEventListener("click", e => {
+							    // prevent event 
+								    e.preventDefault();
+									e.stopPropagation();						  
+							    
+								// open dialog							
+									inputFile.click(); 
+							    
+							});
+
+					}
+
+				// Buld Editor
+					var editor = se.create(
+									document.getElementById('editor')					// Editor dom element
+									, document.querySelector("#content").innerHTML		// Initial HTML String
+									, uploadFiles										// Uploader
+									, exportHTML										// HTML export callback method									
+									// , this											// Callback scope. If not set edidor object view will be the scope
+								);
+					
+				// Tests				
+					setTimeout(function(){ 
+						// Destroy Editor
+							// editor.destroy(); 
+							// Rebuld
+							// setTimeout(function(){ 
+							// 	var editor = se.create(
+							// 		document.getElementById('editor')					// Editor dom element
+							// 		, document.querySelector("#content").innerHTML		// Initial HTML String
+							// 		, uploadFiles										// Uploader
+							// 		, exportHTML										// HTML export callback method									
+							// 		// , this											// Callback scope. If not set edidor object view will be the scope
+							// 	);
+							// }, 3000);
+						// Change html
+							//document.getElementById('editor').innerHTML = "New HMTL from DOM";
+							//editor.html("New HTML from editor object)
+						// Get html
+							// console.log(editor.html());
+					}, 3000);
+
+		</script>
+	</body>
+</html>
